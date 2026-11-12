@@ -76,14 +76,14 @@ const V = {
       <p class="lead">Writeups covering Active Directory, Web, Windows, Linux and Cloud — the bugs, the dead ends, and the flags.</p>
       <a class="btn" href="#writeups">Browse writeups</a></div>
       <div class="orb"><img src="assets/hero.jpg" alt="Hooded Doraemon hacking on a Kali laptop"></div></section>
-    <h2>Latest writeups</h2>${WRITEUPS.length ? `<div class="grid">${sorted(WRITEUPS).slice(0, 3).map(card).join('')}</div>` : empty('No writeups yet.')}
+    <h2>Latest writeups</h2>${WRITEUPS.length ? `<div class="grid writeup-list">${sorted(WRITEUPS).slice(0, 3).map(card).join('')}</div>` : empty('No writeups yet.')}
     <h2>Certifications</h2>${CERTS.length ? `<div class="grid">${sorted(CERTS).map(certCard).join('')}</div>` : empty('No certifications yet.')}`;
   },
   writeups() {
     const list = sorted(WRITEUPS).filter(w => filter === "All" || w.cat === filter);
     return `<h2>Writeups</h2>
       <div class="chips" style="margin:0 0 20px">${["All", ...CATS].map(c => `<button class="btn s ${c === filter ? '' : 'g'}" data-f="${c}">${c}</button>`).join('')}</div>
-      ${list.length ? `<div class="grid">${list.map(card).join('')}</div>` : empty(WRITEUPS.length ? 'Nothing in this category yet.' : 'No writeups yet.')}`;
+      ${list.length ? `<div class="grid writeup-list">${list.map(card).join('')}</div>` : empty(WRITEUPS.length ? 'Nothing in this category yet.' : 'No writeups yet.')}`;
   },
   certs() {
     return `<h2>Certification</h2>${CERTS.length ? `<div class="grid">${sorted(CERTS).map(certCard).join('')}</div>` : empty('No certifications yet.')}`;
