@@ -1,4 +1,4 @@
-/* DORAEMON BLOG — SITE ENGINE + WRITEUP EDITOR */
+https://YOUR-WEBSITE/?editor=1#writeups/* DORAEMON BLOG — SITE ENGINE + WRITEUP EDITOR */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const slug = s => String(s).replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase() || "writeup";
@@ -54,7 +54,7 @@ const empty = msg => `<div class="empty"><p>${msg}</p></div>`;
 const V = {
   home() {
     const pts = writeupsData.reduce((a, w) => a + (+w.pts || 0), 0);
-    return `<section class="hero"><div><span class="pill mono">capture the flag · writeups</span><h1>Every flag has a <em>story</em>.<br>Here's how I got mine.</h1><p class="lead">Writeups covering Active Directory, Web, Windows, Linux and Cloud — the bugs, the dead ends, and the flags.</p><a class="btn" href="#writeups">Browse writeups</a></div><div class="orb"><img src="assets/hero.jpg" alt="Hooded Doraemon hacking on a Kali laptop"></div></section>
+    return `<section class="hero"><div><span class="pill mono">capture the flag · writeups</span><h2>Every flag has a <em>story</em>.<br>Here's how I got mine.</h2><p class="lead">Writeups covering Active Directory, Web, Windows, Linux and Cloud — the bugs, the dead ends, and the flags.</p><a class="btn" href="#writeups">Browse writeups</a></div><div class="orb"><img src="assets/hero.jpg" alt="Hooded Doraemon hacking on a Kali laptop"></div></section>
     <h2>Latest writeups</h2>${writeupsData.length ? `<div class="grid">${sorted(writeupsData).slice(0,3).map(card).join('')}</div>` : empty('No writeups yet.')}<h2>Certifications</h2>${CERTS.length ? `<div class="grid">${sorted(CERTS).map(certCard).join('')}</div>` : empty('No certifications yet.')}`;
   },
   writeups() {
