@@ -72,7 +72,10 @@ const V = {
     const ctfs = new Set(WRITEUPS.map(w => w.ctf).filter(Boolean)).size;
     return `<section class="hero"><div>
       <span class="pill mono">capture the flag · writeups</span>
-      <h2>Every flag has a <em>story</em>.<br>Here's how I got mine.</h2>
+      <h2 class="hero-title" aria-label="Every flag has a story. Here's how I got mine.">
+         <span class="hero-line" data-type-line>Every flag has a <em>story</em>.</span>
+         <span class="hero-line" data-type-line>Here's how I got mine.</span>
+      </h2>
       <p class="lead">Writeups covering Active Directory, Web, Windows, Linux and Cloud — the bugs, the dead ends, and the flags.</p>
       <a class="btn" href="#writeups">Browse writeups</a></div>
       <div class="orb"><img src="assets/hero.jpg" alt="Hooded Doraemon hacking on a Kali laptop"></div></section>
