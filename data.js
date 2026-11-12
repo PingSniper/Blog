@@ -326,14 +326,6 @@ Evil-WinRM shell v3.9
 `
   }
 ];
-id: "Dismay",
-title: "Dismay Hack Smarter labs",
-cat: "Active Directory",
-diff: "Medium",
-date: "2026-04-27",
-summary: "You have been assigned a penetration test of a client’s internal network. There are three different servers in-scope. Your task is to identify all vulnerabilities and demonstrate impact to the client by elevating your access to Domain Admin. The client has provided you VPN access and Active Directory credentials (below) for the engagement.",
-files: `![Arasaka preview](assets/writeups/arasaka/dismay.png)
-
 /* ---------- CERTIFICATIONS ---------- */
 const CERTS = [
   {
