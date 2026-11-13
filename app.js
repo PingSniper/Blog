@@ -70,9 +70,6 @@ const V = {
   home() {
     const pts = WRITEUPS.reduce((a, w) => a + (+w.pts || 0), 0);
     const ctfs = new Set(WRITEUPS.map(w => w.ctf).filter(Boolean)).size;
-    const learnerProfile = (ABOUT.links || []).find(
-  l => l[0] === "Hack Smarter"
-);
     return `<section class="hero"><div>
       <span class="pill mono">capture the flag · writeups</span>
       <h2 class="hero-title" aria-label="Every flag has a story. Here's how I got mine.">
@@ -81,21 +78,7 @@ const V = {
       </h2>
       <p class="lead">Writeups covering Active Directory, Web, Windows, Linux and Cloud — the bugs, the dead ends, and the flags.</p>
       <a class="btn" href="#writeups">Browse writeups</a></div>
-      <div class="hero-profile">
-  <div class="orb">
-    <img src="assets/hero.jpg" alt="Hooded Doraemon hacking on a Kali laptop">
-  </div>
-
-  ${learnerProfile ? `
-    <a class="learner-profile-link"
-       href="${esc(learnerProfile[1])}"
-       target="_blank"
-       rel="noopener noreferrer">
-      <span>Hack Smarter Learner Profile</span>
-      <span class="profile-arrow">↗</span>
-    </a>
-  ` : ''}
-</div></section>
+  <div class="orb"><img src="assets/hero.jpg" alt="Hooded Doraemon hacking on a Kali laptop"></div></section>
     <h2>Latest writeups</h2>${WRITEUPS.length ? `<div class="grid writeup-list">${sorted(WRITEUPS).slice(0, 3).map(card).join('')}</div>` : empty('No writeups yet.')}
     <h2>Certifications</h2>${CERTS.length ? `<div class="grid">${sorted(CERTS).map(certCard).join('')}</div>` : empty('No certifications yet.')}`;
   },
