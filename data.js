@@ -327,6 +327,115 @@ Evil-WinRM shell v3.9
   }
 ];
 
+{
+  id: "Dismay-hsm",
+  title: "Dismay (Hack Smarter Labs)",
+  ctf: "Hack Smarter labs",
+  cat: "Active Directory",
+  diff: "Hard",
+  pts: 0,
+  date: "2026-04-27",
+  summary: "An assumed-breach Active Directory pentest on Hack Smarter Labs.",
+  cover: "assets/writeups/Dismay/dismay.png",
+
+  body: `
+## Scope/Objective
+
+You have been assigned a penetration test of a client’s internal network. There are three different servers in-scope. Your task is to identify all vulnerabilities and demonstrate impact to the client by elevating your access to Domain Admin. The client has provided you VPN access and Active Directory credentials (below) for the engagement.
+
+## Initial creds
+
+\`\`\`text
+Username: xiao.ge
+Password: AmBZATVjnH4qo8H4
+\`\`\`
+
+## Enumerating Nexus
+
+Target IP: \`10.1.107.228\`
+
+## NMAP
+
+\`\`\`text
+80/tcp   open  http          syn-ack ttl 126 Microsoft IIS httpd 10.0
+| http-methods: 
+|   Supported Methods: OPTIONS TRACE GET HEAD POST
+|_  Potentially risky methods: TRACE
+|_http-server-header: Microsoft-IIS/10.0
+|_http-title: IIS Windows Server
+
+135/tcp  open  msrpc         syn-ack ttl 126 Microsoft Windows RPC
+
+139/tcp  open  netbios-ssn   syn-ack ttl 126 Microsoft Windows netbios-ssn
+
+445/tcp  open  microsoft-ds? syn-ack ttl 126
+
+3389/tcp open  ms-wbt-server syn-ack ttl 126 Microsoft Terminal Services
+
+| rdp-ntlm-info: 
+|   Target_Name: EC2AMAZ-GQCP864
+|   NetBIOS_Domain_Name: EC2AMAZ-GQCP864
+|   NetBIOS_Computer_Name: EC2AMAZ-GQCP864
+|   DNS_Domain_Name: EC2AMAZ-GQCP864
+|   DNS_Computer_Name: EC2AMAZ-GQCP864
+|   Product_Version: 10.0.20348
+|_  System_Time: 2026-04-27T05:58:11+00:00
+| ssl-cert: Subject: commonName=EC2AMAZ-GQCP864
+| Issuer: commonName=EC2AMAZ-GQCP864
+
+|_ssl-date: 2026-04-27T05:58:51+00:00; 0s from scanner time.
+5985/tcp open  http          syn-ack ttl 126 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+|_http-server-header: Microsoft-HTTPAPI/2.0
+|_http-title: Not Found
+
+Uptime guess: 0.007 days (since Mon Apr 27 05:49:05 2026)
+Network Distance: 3 hops
+TCP Sequence Prediction: Difficulty=262 (Good luck!)
+IP ID Sequence Generation: Incremental
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Host script results:
+| smb2-security-mode: 
+|   3.1.1: 
+|_  Message signing enabled but not required
+| p2p-conficker: 
+|   Checking for Conficker.C or higher...
+|   Check 1 (port 32054/tcp): CLEAN (Timeout)
+|   Check 2 (port 39521/tcp): CLEAN (Timeout)
+|   Check 3 (port 51370/udp): CLEAN (Timeout)
+|   Check 4 (port 17234/udp): CLEAN (Timeout)
+|_  0/4 checks are positive: Host is CLEAN or ports are blocked
+| smb2-time: 
+|   date: 2026-04-27T05:58:14
+|_  start_date: N/A
+|_clock-skew: mean: 0s, deviation: 0s, median: 0s
+
+TRACEROUTE (using port 135/tcp)
+HOP RTT       ADDRESS
+1   116.24 ms 10.200.0.1
+2   ...
+3   117.83 ms 10.1.107.228
+\`\`\`
+
+### **NetExec SMB Enumeration**
+
+\`\`\`text
+# nxc smb 10.1.107.228 -u xiao.ge -p 'AmBZATVjnH4qo8H4' --shares
+SMB         10.1.107.228    445    EC2AMAZ-GQCP864  [*] Windows Server 2022 Build 20348 x64 (name:EC2AMAZ-GQCP864) (domain:EC2AMAZ-GQCP864) (signing:False) (SMBv1:None)
+SMB         10.1.107.228    445    EC2AMAZ-GQCP864  [+] EC2AMAZ-GQCP864\\xiao.ge:AmBZATVjnH4qo8H4 
+SMB         10.1.107.228    445    EC2AMAZ-GQCP864  [*] Enumerated shares
+SMB         10.1.107.228    445    EC2AMAZ-GQCP864  Share           Permissions     Remark
+SMB         10.1.107.228    445    EC2AMAZ-GQCP864  -----           -----------     ------
+SMB         10.1.107.228    445    EC2AMAZ-GQCP864  ADMIN$                          Remote Admin
+SMB         10.1.107.228    445    EC2AMAZ-GQCP864  C$                              Default share
+SMB         10.1.107.228    445    EC2AMAZ-GQCP864  IPC$            READ            Remote IPC
+SMB         10.1.107.228    445    EC2AMAZ-GQCP864  UpdateServicesPackages READ    A network share to be used by client systems for collecting all software packages (usually applications) published on this WSUS system.
+SMB         10.1.107.228    445    EC2AMAZ-GQCP864  WsusContent     READ            A network share to be used by Local Publishing to place published content on this WSUS system.
+SMB         10.1.107.228    445    EC2AMAZ-GQCP864  WSUSTemp                        A network share used by Local Publishing from a Remote WSUS Console Instance.
+\`\`\`
+`
+},
+
 /* ---------- CERTIFICATIONS ---------- */
 const CERTS = [
   {
