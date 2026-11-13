@@ -50,12 +50,12 @@ const card = w => `<a class="card" href="#${w.id}">
   <h3>${esc(w.title)}</h3><p>${esc(w.summary)}</p>
   <div class="meta mono">${esc(w.ctf)} · ${esc(w.date)}</div></a>`;
 
-function certIcon() {
-  return '<svg viewBox="0 0 64 64" width="30" height="30" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="13" y="5" width="32" height="40" rx="5" fill="#2a0b0d"/><rect x="20" y="15" width="18" height="3.4" rx="1.7" fill="#fff"/><rect x="20" y="23" width="18" height="3.4" rx="1.7" fill="#fff"/><rect x="20" y="31" width="12" height="3.4" rx="1.7" fill="#fff"/><path d="M22 44 L22 58 L29 53 L36 58 L36 44 Z" fill="#2a0b0d"/><circle cx="29" cy="44" r="11" fill="#2a0b0d"/><circle cx="29" cy="44" r="7.5" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M29 40.3 L30.3 42.9 L33.1 43.3 L31.1 45.3 L31.6 48.1 L29 46.7 L26.4 48.1 L26.9 45.3 L24.9 43.3 L27.7 42.9 Z" fill="#fff"/></svg>';
+function certBadgeIcon() {
+  return '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="9" r="6"/><path d="M8.5 14.2 7 21l5-2.6 5 2.6-1.5-6.8"/></svg>';
 }
 
 const certCard = c => `<div class="card cert">
-  <div class="cert-head"><div class="badge">${c.badgeUrl ? `<img src="${esc(c.badgeUrl)}" alt="${esc(c.name)} badge" style="width:100%;height:100%;object-fit:cover;border-radius:50%">` : certIcon()}</div><h3>${esc(c.name)}</h3></div>
+  <div class="cert-head"><div class="cert-icon" style="color:var(--blue)">${certBadgeIcon()}</div><span class="cert-pill mono">${esc(c.name)}</span></div>
   <p>${esc(c.note)}</p>
   <div class="meta mono">${esc(c.issuer)} · ${esc(c.date)}${c.credId ? ' · ID ' + esc(c.credId) : ''}</div>
   ${c.fileUrl && isImg(c.fileType) ? `<img src="${esc(c.fileUrl)}" alt="${esc(c.name)} certificate">` : ''}
