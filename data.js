@@ -324,10 +324,9 @@ Evil-WinRM shell v3.9
 
 ![Evil-WinRM shell as the_emperor](assets/writeups/arasaka/evil-winrm.png)
 `
-  }
-];
+  },
 
-{
+  { 
   id: "Dismay-hsm",
   title: "Dismay (Hack Smarter Labs)",
   ctf: "Hack Smarter labs",
@@ -434,7 +433,8 @@ SMB         10.1.107.228    445    EC2AMAZ-GQCP864  WsusContent     READ        
 SMB         10.1.107.228    445    EC2AMAZ-GQCP864  WSUSTemp                        A network share used by Local Publishing from a Remote WSUS Console Instance.
 \`\`\`
 `
-},
+  }
+];
 
 /* ---------- CERTIFICATIONS ---------- */
 const CERTS = [
