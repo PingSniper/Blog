@@ -434,7 +434,7 @@ SMB         10.1.107.228    445    EC2AMAZ-GQCP864  WSUSTemp                    
 
 ## XFreeRDP to Get an RDP Shell for \`xiao.ge\`
 
-![XFreeRDP RDP session for xiao.ge](<assets/writeups/Dismay/RDP(Xiaoge).png>)
+![XFreeRDP RDP session for xiao.ge](<assets/writeups/Dismay/RDP-Xiaoge.png>)
 `
   }
 ];
