@@ -11,7 +11,7 @@ const ABOUT = {
 };
 
 // Categories shown as filter chips on the Writeups page.
-const CATS = ["Active Directory", "Web", "Windows", "Linux", "Cloud", "OSCP-LK"];
+const CATS = ["Active Directory", "Web", "Windows", "Linux", "Cloud", "OSCP-LK", "Ranges"];
 const DIFFS = ["Easy", "Medium", "Hard", "Insane"];
 
 /* ---------- WRITEUPS ----------
