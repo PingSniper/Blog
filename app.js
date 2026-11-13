@@ -70,6 +70,9 @@ const V = {
   home() {
     const pts = WRITEUPS.reduce((a, w) => a + (+w.pts || 0), 0);
     const ctfs = new Set(WRITEUPS.map(w => w.ctf).filter(Boolean)).size;
+    const learnerProfile = (ABOUT.links || []).find(
+  l => l[0] === "Hack Smarter"
+);
     return `<section class="hero"><div>
       <span class="pill mono">capture the flag · writeups</span>
       <h2 class="hero-title" aria-label="Every flag has a story. Here's how I got mine.">
