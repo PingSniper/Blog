@@ -335,9 +335,8 @@ Evil-WinRM shell v3.9
   pts: 0,
   date: "2026-04-27",
   summary: "An assumed-breach Active Directory pentest on Hack Smarter Labs.",
-  cover: "assets/writeups/Dismay/dismay.png",
 
-  body: `
+  body: `![Dismay preview](assets/writeups/Dismay/dismay.png)
 ## Scope/Objective
 
 You have been assigned a penetration test of a client’s internal network. There are three different servers in-scope. Your task is to identify all vulnerabilities and demonstrate impact to the client by elevating your access to Domain Admin. The client has provided you VPN access and Active Directory credentials (below) for the engagement.
