@@ -443,6 +443,10 @@ UpdateServicesPackages
 ## XFreeRDP to Get an RDP Shell for xiao.ge
 
 ![XFreeRDP RDP session for xiao.ge](assets/writeups/Dismay/RDP-Xiaoge.png)
+
+\`\`\`text
+PS> These files were originally in the Recycle bin but i restored them
+\`\`\`
 `
   }
 ];
