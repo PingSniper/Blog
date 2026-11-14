@@ -872,7 +872,7 @@ dismay\\administrator
    title: "Martini AD (Hack Smarter Labs)",
    ctf: "Hack Smarter Labs",
    cat: "Active Directory",
-   diff: "Medium",
+   diff: "Easy",
    pts: 0,
    date: "2026-10-24",
    summary: "An internal black-box Active Directory assessment that moves from guest SMB enumeration to domain compromise through exposed notes, Kerberoasting, credential reuse and DCSync.",
