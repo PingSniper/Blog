@@ -196,4 +196,5 @@ document.addEventListener('click', e => {
 });
 
 addEventListener('hashchange', route);
+startHeaderTypewriter();
 route();
