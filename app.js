@@ -66,16 +66,28 @@ const certCard = c => `<div class="card cert">
 
 const empty = msg => `<div class="empty"><p>${msg}</p></div>`;
 
+// Types ABOUT.bio into the home-page terminal, one character at a time.
+function startTypewriter() {
+  const el = document.getElementById('term-typed');
+  if (!el) return;
+  const text = (ABOUT && ABOUT.bio) || '';
+  let i = 0;
+  el.textContent = '';
+  clearInterval(window.__typeTimer);
+  window.__typeTimer = setInterval(() => {
+    i++;
+    el.textContent = text.slice(0, i);
+    if (i >= text.length) clearInterval(window.__typeTimer);
+  }, 22);
+}
+
 const V = {
   home() {
     const pts = WRITEUPS.reduce((a, w) => a + (+w.pts || 0), 0);
     const ctfs = new Set(WRITEUPS.map(w => w.ctf).filter(Boolean)).size;
     return `<section class="hero"><div>
       <span class="pill mono">capture the flag · writeups</span>
-      <h2 class="hero-title" aria-label="Every flag has a story. Here's how I got mine.">
-         <span class="hero-line" data-type-line>Every flag has a <em>story</em>.</span>
-         <span class="hero-line" data-type-line>Here's how I got mine.</span>
-      </h2>
+      <div class="term-card"><div class="term-bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="mono term-title">doraemon@pocket: ~</span></div><div class="term-body mono"><div class="term-line"><span class="term-prompt">doraemon@pocket</span><span class="term-sep">:~$</span> cat whoami</div><div class="term-out" id="term-typed"></div><div class="term-line"><span class="term-prompt">doraemon@pocket</span><span class="term-sep">:~$</span> <span class="term-cursor">█</span></div></div></div>
       <p class="lead">Writeups covering Active Directory, Web, Windows, Linux and Cloud — the bugs, the dead ends, and the flags.</p>
       <a class="btn" href="#writeups">Browse writeups</a></div>
   <div class="orb"><img src="assets/hero.jpg" alt="Hooded Doraemon hacking on a Kali laptop"></div></section>
@@ -112,6 +124,7 @@ function route() {
   document.querySelectorAll('nav a').forEach(a =>
     a.classList.toggle('on', a.dataset.r === h || (w && a.dataset.r === 'writeups')));
   window.scrollTo(0, 0);
+  if (!w && h === 'home') startTypewriter();
 }
 
 document.addEventListener('click', e => {
