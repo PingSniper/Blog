@@ -620,7 +620,7 @@ RustHound-CE Enumeration Completed!
 
 ## BloodHound Analysis
 
-![BloodHound Analysis - Initial graph](assets/writeups/Dismay/BH(1).png)
+![BloodHound Analysis - Initial graph](assets/writeups/Dismay/BH1.png)
 
 Changing password for \`JENA.YAMAZAKI\`.
 
