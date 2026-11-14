@@ -200,7 +200,11 @@ footer{text-align:center;color:var(--mute);padding:30px;font-size:14px;border-to
   }
 }
 
-@media(prefers-reduced-motion:reduce){
-  .term-cursor{animation:none;opacity:1}
-  .card,a.card{transition:none}
+/* Extend terminal horizontally to the left */
+@media (min-width: 821px) {
+  .term-card {
+    width: calc(100% + 55px);
+    max-width: 815px;
+    margin-left: -55px;
+  }
 }
