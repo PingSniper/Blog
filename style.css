@@ -145,15 +145,19 @@ footer{text-align:center;color:var(--mute);padding:30px;font-size:14px;border-to
 }
 
 /* Terminal hero — Kali-inspired dark terminal */
-.term-card{
-  background:#101510;
-  border:1px solid #344b38;
-  border-radius:16px;
-  overflow:hidden;
-  max-width:760px;
-  width:100%;
-  margin-top:26px;
-  box-shadow:0 20px 60px #00000070;
+/* Black terminal theme */
+.term-card {
+  background: #000000;
+  border: 1px solid #344b38;
+}
+
+.term-bar {
+  background: #000000;
+  border-bottom: 1px solid #344b38;
+}
+
+.term-out {
+  color: #b5ffb5;
 }
 .term-bar{
   display:flex;
