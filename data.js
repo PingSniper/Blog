@@ -877,7 +877,7 @@ dismay\\administrator
    date: "2026-10-24",
    summary: "An internal black-box Active Directory assessment that moves from guest SMB enumeration to domain compromise through exposed notes, Kerberoasting, credential reuse and DCSync.",
    files: [],
-   body: `![Martini AD preview](assets/writeups/BitStream/image.png)
+   body: `![Martini AD preview](assets/writeups/martiniAD/preview.png)
 
 ## Scope / Objective
 
