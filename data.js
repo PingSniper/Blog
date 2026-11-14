@@ -467,4 +467,14 @@ const CERTS = [
     fileUrl: "https://certified.tcm-sec.com/d20f0124-d39f-4b72-8449-42e386c89f44#acc.ET8cqlbS", // e.g. "assets/certs/pjpt.jpg" once you add the certificate image/PDF
     fileType: ""  // e.g. "image/jpeg" or "application/pdf"
   }
+    id: "c-crto",
+    name: "CRTO",
+    issuer: "Zero Point Security",
+    date: "2026-11",
+    credId: "",
+    link: "", // verify link removed to avoid exposing the real name on the public Accredible page
+    note: "Red Teaming , OPSEC , Evasion , Lateral Movement , Privilege Escalation , Active Directory hacking , Enumeration",
+    badgeUrl: "assets/certs/pjpt-badge.png",
+    fileUrl: "", // e.g. "assets/certs/pjpt.jpg" once you add the certificate image/PDF
+    fileType: ""  // e.g. "image/jpeg" or "application/pdf"
 ];
