@@ -191,6 +191,14 @@ footer{text-align:center;color:var(--mute);padding:30px;font-size:14px;border-to
   animation:blink 1s step-end infinite;
 }
 @keyframes blink{50%{opacity:0}}
+/* Extend terminal horizontally to the left */
+@media (min-width: 821px) {
+  .term-card {
+    width: calc(100% + 45px);
+    max-width: 805px;
+    margin-left: -45px;
+  }
+}
 
 @media(prefers-reduced-motion:reduce){
   .term-cursor{animation:none;opacity:1}
