@@ -81,6 +81,57 @@ function startTypewriter() {
   }, 22);
 }
 
+// Header typewriter — rotating cybersecurity techniques.
+function startHeaderTypewriter() {
+  const el = document.querySelector('#header-typed span');
+  if (!el) return;
+
+  const messages = [
+    'secretsdump.py...',
+    'S4U2self...',
+    'relaying...'
+  ];
+
+  let messageIndex = 0;
+  let charIndex = 0;
+  let deleting = false;
+
+  clearTimeout(window.__headerTypeTimer);
+
+  function type() {
+    const message = messages[messageIndex];
+
+    if (!deleting) {
+      charIndex++;
+      el.textContent = message.slice(0, charIndex);
+
+      if (charIndex === message.length) {
+        deleting = true;
+        window.__headerTypeTimer = setTimeout(type, 1100);
+        return;
+      }
+
+      window.__headerTypeTimer = setTimeout(type, 75);
+    } else {
+      charIndex--;
+      el.textContent = message.slice(0, charIndex);
+
+      if (charIndex === 0) {
+        deleting = false;
+        messageIndex = (messageIndex + 1) % messages.length;
+
+        window.__headerTypeTimer = setTimeout(type, 350);
+        return;
+      }
+
+      window.__headerTypeTimer = setTimeout(type, 38);
+    }
+  }
+
+  type();
+}
+
+
 const V = {
   home() {
     const pts = WRITEUPS.reduce((a, w) => a + (+w.pts || 0), 0);
