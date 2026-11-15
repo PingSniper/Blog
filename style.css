@@ -147,8 +147,8 @@ footer{text-align:center;color:var(--mute);padding:30px;font-size:14px;border-to
 /* Terminal hero — Kali-inspired dark terminal */
 /* Black terminal theme */
 .term-card {
-  background: #000000;
-  border: 1px solid #344b38;
+    border-radius: 14px;
+    overflow: hidden;
 }
 
 .term-bar {
