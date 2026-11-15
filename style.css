@@ -178,3 +178,7 @@ footer{text-align:center;color:var(--mute);padding:30px;font-size:14px;border-to
 .term-out em{color:var(--blue);font-style:normal}
 .term-cursor{display:inline-block;width:9px;height:1em;background:var(--text);vertical-align:middle;animation:blink 1s step-end infinite}
 @keyframes blink{50%{opacity:0}}
+.hero-right{display:flex;flex-direction:column;align-items:center;gap:18px}
+.social-row{display:flex;gap:12px;justify-content:center}
+.social-row a{width:46px;height:46px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;color:var(--gold);transition:.15s}
+.social-row a:hover{border-color:var(--gold);transform:translateY(-2px)}
