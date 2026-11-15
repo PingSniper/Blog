@@ -141,7 +141,8 @@ const V = {
       <div class="term-card"><div class="term-bar"><i class="r"></i><i class="y"></i><i class="g"></i><span class="mono term-title">doraemon@pocket: ~</span></div><div class="term-body mono"><div class="term-line"><span class="term-prompt">doraemon@pocket</span><span class="term-sep">:~$</span> cat whoami</div><div class="term-out" id="term-typed"></div><div class="term-line"><span class="term-prompt">doraemon@pocket</span><span class="term-sep">:~$</span> <span class="term-cursor">█</span></div></div></div>
       <p class="lead">Writeups covering Active Directory, Web, Windows, Linux and Cloud — the bugs, the dead ends, and the flags.</p>
       <a class="btn" href="#writeups">Browse writeups</a></div>
-  <div class="orb"><img src="assets/hero.jpg" alt="Hooded Doraemon hacking on a Kali laptop"></div></section>
+  <div class="hero-right"><div class="orb"><img src="assets/hero.jpg" alt="Hooded Doraemon hacking on a Kali laptop"></div>
+  <div class="social-row"><a href="https://www.hacksmarter.org/learners/e18d9662-7163-458a-89c7-d62d9e8ca76d" target="_blank" rel="noopener" title="Hack Smarter Labs" style="color:#2ecc71"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-4 0-7 3-7 7v2.5c0 1.5 1 2.5 2 3l-1 2c-.3.8.5 1.4 1.2 1l2.3-1.3h5l2.3 1.3c.7.4 1.5-.2 1.2-1l-1-2c1-.5 2-1.5 2-3V10c0-4-3-7-7-7z"/><ellipse cx="9" cy="10.2" rx="1.1" ry="1.5" fill="currentColor" stroke="none"/><ellipse cx="15" cy="10.2" rx="1.1" ry="1.5" fill="currentColor" stroke="none"/></svg></a></div></div></section>
     <h2>Latest writeups</h2>${WRITEUPS.length ? `<div class="grid writeup-list">${sorted(WRITEUPS).slice(0, 3).map(card).join('')}</div>` : empty('No writeups yet.')}
     <h2>Certifications</h2>${CERTS.length ? `<div class="grid">${sorted(CERTS).map(certCard).join('')}</div>` : empty('No certifications yet.')}`;
   },
