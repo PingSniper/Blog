@@ -998,7 +998,7 @@ nxc smb 10.1.253.173 -u athena.t0 -p '[REDACTED]' --ntds
 \`\`\`
 ![DCSync results](assets/writeups/martiniAD/psexec.png)
 ![DCSync results](assets/writeups/martiniAD/dcsync.png)
-
+![DCSync results](assets/writeups/martiniAD/cert.png)
 ## Key Findings
 
 - Guest-accessible SMB shares exposed internal notes containing valid domain credentials.
