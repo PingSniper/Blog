@@ -1056,11 +1056,13 @@ I started by identifying the available hosts and enumerating their exposed servi
 
 Nmap identified three Windows Server 2022 hosts within the \`LAINOSCP.local\` domain. The scans revealed the following exposed TCP services and SMB signing configurations:
 
+\`\`\`text
 | Host | Role | Open TCP Ports | SMB Signing |
 |---|---|---|---|
 | DC01 | Domain Controller | 53, 88, 135, 139, 389, 445, 464, 593, 636, 3268, 3269, 3389, 5985 | Enabled and required |
 | FORENSICS01 | Forensics Server | 135, 139, 445, 3389, 5985 | Enabled, not required |
 | WS01 | Domain Workstation | 135, 139, 445, 3389, 5985 | Enabled, not required |
+\`\`\`
 
 The Domain Controller exposed additional services associated with Active Directory, including DNS (53), Kerberos (88), LDAP (389) and the Global Catalog (3268). All three hosts exposed SMB (445), RDP (3389) and WinRM (5985), providing potential avenues for authenticated administration and further enumeration.
 
