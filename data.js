@@ -902,9 +902,9 @@ nxc smb 10.1.253.173 -u '' -p '' --shares
 nxc smb 10.1.253.173 -u guest -p '' --shares
 \`\`\`
 
-![SMB null authentication check](assets/writeups/martiniAD/nxc(null).png)
+![SMB null authentication check](assets/writeups/martiniAD/nxc-null.png)
 
-![SMB share enumeration](assets/writeups/martiniAD/smb(share).png)
+![SMB share enumeration](assets/writeups/martiniAD/smb-share.png)
 
 ### Notes Share
 
@@ -914,9 +914,9 @@ The \`Notes\` share was accessible through the guest account. Reviewing its cont
 smbclient //10.1.253.173/notes -U guest
 \`\`\`
 
-![Notes share contents](assets/writeups/martiniAD/note(share).png)
+![Notes share contents](assets/writeups/martiniAD/note-share.png)
 
-![Additional notes screenshot](assets/writeups/martiniAD/note(share2).png)
+![Additional notes screenshot](assets/writeups/martiniAD/note-share2.png)
 
 ## Initial Access
 
@@ -926,7 +926,7 @@ The notes contained credentials for the account \`mprice\`. I used them to enume
 mprice : [REDACTED]
 \`\`\`
 
-![Recovered credentials from notes](assets/writeups/martiniAD/creds(note).png)
+![Recovered credentials from notes](assets/writeups/martiniAD/creds-note.png)
 
 ### Username Enumeration
 
@@ -941,7 +941,7 @@ The enumeration identified the following principals:
 - \`ATHENA_SVC\`
 - \`DC01$\`
 
-![RID brute-force user enumeration](assets/writeups/martiniAD/user(enum).png)
+![RID brute-force user enumeration](assets/writeups/martiniAD/user-enum.png)
 
 ## Kerberoasting
 
