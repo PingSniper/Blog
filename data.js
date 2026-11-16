@@ -1018,6 +1018,354 @@ nxc smb 10.1.253.173 -u athena.t0 -p '[REDACTED]' --ntds
 `
 }
 
+
+{
+  id: "Forensics-hsm",
+  title: "Forensics (Hack Smarter Labs)",
+  ctf: "Hack Smarter Labs",
+  cat: "OSCP-LK",
+  diff: "Medium",
+  pts: 0,
+  date: "2026-11-16",
+  summary: "An assumed-breach Active Directory assessment involving targeted Kerberoasting, forensic artefact analysis, credential discovery, lateral movement and privilege escalation across three Windows hosts.",
+  body: `
+# Forensics — Hack Smarter Labs
+
+**Machine:** Active Directory  
+**Platform:** Hack Smarter Labs  
+**Difficulty:** Medium  
+**Author:** LainKusanagi
+
+## Scope / Objective
+
+This lab is a hosted version of the OSCP-LK set. OSCP-LK consists of machines designed around the PEN-200 labs and exam, intended to improve enumeration, creative thinking and exploitation methodology.
+
+The assessment began with assumed-breach credentials for the domain user \`shannon\`.
+
+\`\`\`text
+Domain: LAINOSCP.local
+User: shannon
+Password: [REDACTED]
+\`\`\`
+
+## Initial Enumeration
+
+### Network Discovery
+
+I started by identifying the available hosts and enumerating their exposed services.
+
+Nmap identified three Windows Server 2022 machines:
+
+| Host | Role |
+|---|---|
+| DC01 | Domain Controller |
+| WS01 | Domain Workstation |
+| FORENSICS01 | Forensics Server |
+
+The primary services identified included:
+
+- TCP 53 — DNS
+- TCP 88 — Kerberos
+- TCP 135 — MSRPC
+- TCP 139 — NetBIOS
+- TCP 389 — LDAP
+- TCP 445 — SMB
+- TCP 3389 — RDP
+- TCP 5985 — WinRM
+
+![Initial Nmap enumeration](assets/writeups/forensics/image1.png)
+
+### SMB Enumeration
+
+With the supplied credentials, I enumerated SMB shares across all three hosts using NetExec.
+
+\`\`\`bash
+nxc smb ip.txt -u shannon -p '<REDACTED>' --shares
+\`\`\`
+
+The credentials were accepted across the environment. However, the accessible shares were largely limited to standard administrative and IPC shares.
+
+The Domain Controller also exposed the standard NETLOGON and SYSVOL shares with read permissions.
+
+### Username Enumeration
+
+I continued by enumerating domain users through SMB.
+
+\`\`\`bash
+nxc smb ip.txt -u shannon -p '<REDACTED>' --users-export users.txt
+\`\`\`
+
+The enumeration returned the following accounts:
+
+\`\`\`text
+Administrator
+Guest
+krbtgt
+shannon
+lion
+kanon
+erika
+\`\`\`
+
+I saved the discovered usernames for subsequent enumeration.
+
+## BloodHound Analysis
+
+Next, I used RustHound to collect Active Directory information and ingest the resulting data into BloodHound.
+
+This provided a clearer picture of the domain structure, user relationships and potential attack paths.
+
+![BloodHound analysis](assets/writeups/forensics/image2.png)
+
+## Initial Access — Targeted Kerberoasting
+
+During further enumeration, I investigated the possibility of Kerberoasting domain accounts.
+
+I used TargetedKerberoast to identify accounts that could be targeted through SPN manipulation.
+
+\`\`\`bash
+python3 targetedKerberoast.py -v \\
+  -d "LAINOSCP.local" \\
+  -u "shannon" \\
+  -p '<REDACTED>' \\
+  --dc-host DC01.LAINOSCP.local
+\`\`\`
+
+The tool successfully added an SPN to the account \`lion\` and retrieved a Kerberos TGS hash.
+
+The SPN was subsequently removed by the tool.
+
+### Hash Cracking
+
+I saved the retrieved hash and attempted to recover the associated password using John the Ripper.
+
+\`\`\`bash
+john hash.txt --wordlist=/usr/share/wordlists/rockyou.txt
+\`\`\`
+
+The password was successfully recovered.
+
+I then used NetExec to verify the credentials against the available WinRM services.
+
+\`\`\`bash
+nxc winrm ip.txt -u lion -p '<REDACTED>'
+\`\`\`
+
+The credentials were valid for WinRM on WS01, providing an initial foothold on the workstation.
+
+![WinRM access as lion](assets/writeups/forensics/image3.png)
+
+## Credential Discovery — Database1.accdb
+
+After obtaining access to WS01, I explored the accessible files and directories.
+
+One particularly interesting discovery was a Microsoft Access database named \`Database1.accdb\`.
+
+![Database1.accdb discovery](assets/writeups/forensics/image4.png)
+
+### Analysing the Database
+
+I initially attempted to inspect the database using accdb.py.
+
+\`\`\`bash
+python3 accdb.py info Database1.accdb
+\`\`\`
+
+However, the database was password-protected.
+
+I therefore extracted its password hash using office2john.
+
+\`\`\`bash
+office2john Database1.accdb > accdbhash.txt
+\`\`\`
+
+I then used John the Ripper to recover the database password.
+
+\`\`\`bash
+john accdbhash.txt --show
+\`\`\`
+
+After recovering the password, I could inspect the database contents.
+
+\`\`\`bash
+python3 accdb.py info Database1.accdb -p '<REDACTED>'
+\`\`\`
+
+The database contained two tables:
+
+- Users
+- f_17D2B2C18B8040A88C583DF95A5BC07F_Data
+
+The tool also identified VBA/macro content within the database, suggesting that additional information could be stored beyond the visible tables.
+
+![Database information](assets/writeups/forensics/image5.png)
+
+### Extracting Credentials
+
+Further inspection of the database revealed additional account credentials.
+
+The recovered information included credentials associated with:
+
+- kanon
+- shannon
+- gap
+
+I redacted the recovered passwords from this public write-up.
+
+## Lateral Movement — WS01
+
+I proceeded to validate the newly discovered credentials across the environment.
+
+\`\`\`bash
+nxc smb ip.txt -u kanon -p '<REDACTED>'
+\`\`\`
+
+The credentials were accepted across the three hosts.
+
+More importantly, NetExec identified administrative access on WS01.
+
+This provided a stronger security context on the workstation and allowed me to investigate its locally stored credential material.
+
+![Local administrator access on WS01](assets/writeups/forensics/image6.png)
+
+### LSA Secrets Enumeration
+
+I investigated the locally stored secrets on WS01.
+
+The resulting enumeration exposed cached domain credential material and additional secret information, including an account credential that was not immediately associated with a known user.
+
+I redacted the recovered secrets from the output.
+
+![LSA secrets enumeration](assets/writeups/forensics/image7.png)
+
+### Password Reuse Investigation
+
+I added the discovered domain usernames to my existing user list and investigated whether the recovered credential was reused elsewhere.
+
+The validation identified the account \`erika\` as accepting the recovered credential across all three hosts.
+
+This provided another route into the environment.
+
+## Privilege Escalation — FORENSICS01
+
+I established a WinRM session using the \`erika\` account and inspected the available Windows privileges.
+
+\`\`\`powershell
+whoami /priv
+\`\`\`
+
+The output showed that the account had the following enabled privileges:
+
+| Privilege | Description |
+|---|---|
+| SeDebugPrivilege | Debug programs |
+| SeChangeNotifyPrivilege | Bypass traverse checking |
+| SeIncreaseWorkingSetPrivilege | Increase a process working set |
+
+The presence of SeDebugPrivilege was particularly interesting because it grants significant process-inspection capabilities.
+
+### LSASS Investigation
+
+I investigated the LSASS process and its accessibility within the current security context.
+
+During the successful attempt documented in my original lab notes, ProcDump produced a memory dump that I subsequently analysed with pypykatz.
+
+\`\`\`powershell
+.\procdump.exe -accepteula -ma lsass.exe lsass.dmp
+\`\`\`
+
+The resulting dump was transferred for offline analysis.
+
+\`\`\`bash
+pypykatz lsa minidump lsass.dmp
+\`\`\`
+
+The analysis revealed a logon session belonging to the local Administrator account on FORENSICS01.
+
+The extracted credential material was redacted.
+
+![LSASS analysis](assets/writeups/forensics/image8.png)
+
+### Access to FORENSICS01
+
+With the recovered credential material, I established administrative access to FORENSICS01 through WinRM.
+
+This represented another significant step in the assessment, as I had moved from the initial workstation foothold to administrative access on the dedicated forensics server.
+
+![Administrator access to FORENSICS01](assets/writeups/forensics/image9.png)
+
+## Domain-Level Credential Material
+
+While exploring the Administrator's Documents directory on FORENSICS01, I discovered an interesting directory named \`iocs\`.
+
+Its contents included:
+
+\`\`\`text
+administrator.kirbi
+beacon_x64.exe
+mimikatz.exe
+notes.txt
+\`\`\`
+
+The presence of these files provided additional forensic artefacts worth investigating.
+
+### Kerberos Ticket Analysis
+
+One of the discovered files was \`administrator.kirbi\`, a Kerberos ticket.
+
+I converted the ticket into the ccache format for further examination.
+
+\`\`\`bash
+impacket-ticketConverter administrator.kirbi admin.ccache
+\`\`\`
+
+The conversion completed successfully.
+
+### Domain Credential Analysis
+
+I continued investigating the domain-level credential material and examined the available account information.
+
+The final enumeration revealed credential material associated with multiple domain accounts, including:
+
+- Administrator
+- Guest
+- krbtgt
+- shannon
+- lion
+- kanon
+- erika
+- DC01$
+- WS01$
+- FORENSICS01$
+
+Sensitive hashes and credential material have been omitted from this write-up.
+
+![Domain credential enumeration](assets/writeups/forensics/image10.png)
+
+## Conclusion
+
+Forensics was an interesting Active Directory assessment that required more than conventional domain enumeration.
+
+The initial foothold came from the supplied credentials, followed by targeted Kerberoasting to obtain access to WS01.
+
+The discovery of the password-protected Access database was particularly important, as it introduced another source of credential material and enabled further movement through the environment.
+
+The most interesting part of the assessment was the transition from workstation access to administrative access on FORENSICS01. Investigating Windows privileges, LSASS and the available forensic artefacts helped demonstrate how locally accessible information can affect the security of an entire domain.
+
+### Key Takeaways
+
+- Targeted Kerberoasting can expose accounts with weak passwords.
+- Password-protected database files can contain valuable information.
+- Credential reuse can significantly increase the impact of an initial compromise.
+- Windows privileges such as SeDebugPrivilege deserve careful investigation.
+- LSASS and locally stored secrets can expose sensitive authentication material.
+- Forensic artefacts, including Kerberos tickets, can provide important evidence during an assessment.
+
+Overall, this range reinforced the importance of thorough enumeration and investigating seemingly ordinary files rather than relying exclusively on conventional Active Directory attack paths.
+`
+},
+
+
 ];
 
 /* ---------- CERTIFICATIONS ---------- */
