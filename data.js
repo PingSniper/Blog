@@ -1016,7 +1016,7 @@ nxc smb 10.1.253.173 -u athena.t0 -p '[REDACTED]' --ntds
 - Audit and tightly restrict directory replication permissions, including \`DS-Replication-Get-Changes\` and \`DS-Replication-Get-Changes-All\`.
 - Monitor for unusual directory replication activity and review privileged account membership regularly.
 `
-}
+},
 
 
 {
